@@ -2,9 +2,6 @@ import base64 from 'base-64';
 import _ from 'lodash';
 
 
-
-
-
 export default class Hawkular {
     constructor(url, basic_auth) {
         this.url = url;
@@ -71,19 +68,29 @@ export default class Hawkular {
     }
 
 
-    sendCounter = (name, value, okHandler, errorHandler) => {
-        const ts = + new Date();
-        const options = {
+    _prepareParams = (value, okHandler, errorHandler) => {
+        return {
             method: 'POST',
             okHandler: okHandler,
             errorHandler: errorHandler,
             data: [{
-                timestamp: ts,
+                timestamp: + new Date(),
                 value: value
             }]
-        };
+        }        
+    }
+
+
+    sendCounter = (name, value, okHandler, errorHandler) => {
+        const options = this._prepareParams(value, okHandler, errorHandler);
         const path = `${this.metrics_path}/counters/${name}/raw`;
         this.request(path, options);
     }
 
+
+    pushGauge = (name, value, okHandler, errorHandler) => {
+        const options = this._prepareParams(value, okHandler, errorHandler);
+        const path = `${this.metrics_path}/gauges/${name}/raw`;
+        this.request(path, options);
+    }
 }
